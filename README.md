@@ -27,5 +27,5 @@ $ docker create --name=transmission \
 linuxserver/transmission
 ```
 ```sh
-$ docker run --rm -i --tty linuxserver/transmission
+$ docker run --rm -i --tty --net=host linuxserver/transmission
 ```
