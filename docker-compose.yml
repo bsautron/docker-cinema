@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+        transmission:
+                image: linuxserver/transmission
+                container_name: transmission
+                restart: always
+                ports:
+                        - 9091:9091
+                        - 51413:51413
+                        - 51413:51413/udp
+                networks:
+                        - plexnet
+                environment:
+                        - PUID=1001
+                        - PGID=1001
+                        - TZ=Europe/Paris
+                volumes:
+                        - ${MOUNT_POINT}/transmission/config:/config
+                        - ${MOUNT_POINT}/transmission/downloads:/downloads
+                        - ${MOUNT_POINT}/transmission/watch:/watch
+        plex:
+                image: linuxserver/plex
+                container_name: plex
+                restart: always
+                ports:
+                        - "32400:32400"
+                        - "32400:32400/udp"
+                        - "32469:32469"
+                        - "32469:32469/udp"
+                        - "5353:5353/udp"
+                        - "1900:1900/udp"
+                networks:
+                        - plexnet
+                environment:
+                        - PUID=1001
+                        - PGID=1001
+                        - TZ=Europe/Paris
+                volumes:
+                        - ${MOUNT_POINT}/plex/config:/config
+                        - ${MOUNT_POINT}/plex/movies:/movies
+                        - ${MOUNT_POINT}/plex/tvshows/tvshows
+                        - ${MOUNT_POINT}/plex/transcode:/transcode
+
+
+networks:
+        plexnet:
+                driver: bridge
