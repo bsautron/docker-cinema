@@ -39,7 +39,7 @@ services:
                 volumes:
                         - ${MOUNT_POINT}/plex/config:/config
                         - ${MOUNT_POINT}/plex/movies:/movies
-                        - ${MOUNT_POINT}/plex/tvshows:tvshows
+                        - ${MOUNT_POINT}/plex/tvshows:/tvshows
                         - ${MOUNT_POINT}/plex/transcode:/transcode
         sickrage:
                 image: linuxserver/sickrage
