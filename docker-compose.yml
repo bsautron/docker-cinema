@@ -39,10 +39,24 @@ services:
                 volumes:
                         - ${MOUNT_POINT}/plex/config:/config
                         - ${MOUNT_POINT}/plex/movies:/movies
-                        - ${MOUNT_POINT}/plex/tvshows/tvshows
+                        - ${MOUNT_POINT}/plex/tvshows:tvshows
                         - ${MOUNT_POINT}/plex/transcode:/transcode
-
-
+        sickrage:
+                image: linuxserver/sickrage
+                container_name: sickrage
+                restart: always
+                ports:
+                        - 8081:8081
+                networks:
+                        - plexnet
+                environment:
+                        - PUID=1001
+                        - PGID=1001
+                        - TZ=Europe/Paris
+                volumes:
+                        - ${MOUNT_POINT}/sickrage/config:/config
+                        - ${MOUNT_POINT}/sickrage/downloads:/downloads
+                        - ${MOUNT_POINT}/sickrage/tv:/tv
 networks:
         plexnet:
                 driver: bridge
