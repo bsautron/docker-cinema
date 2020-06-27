@@ -1,4 +1,4 @@
-docker-compose up
-docker-compose stop
-docker-compose start
-docker-compose rm
+transmission download to ./downloads/complete
+sickchichil post-copy to ./media/tvshows
+couchpotato post-copy to ./media/movies
+plex watch media/\* folders
