@@ -1,0 +1,8 @@
+.env
+media
+downloads
+services/couchpotato/config
+services/plex/config
+services/plexpy/config
+services/sickchill/config.ini
+services/transmission/config
