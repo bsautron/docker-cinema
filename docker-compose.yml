@@ -34,6 +34,7 @@ services:
                 image: linuxserver/plex
                 container_name: plex
                 restart: always
+                network_mode: host
                 ports:
                         - 32400:32400
                         - 32400:32400/udp
@@ -41,7 +42,6 @@ services:
                         - 32469:32469/udp
                         - 5353:5353/udp
                         - 1900:1900/udp
-                network_mode: host
                 environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
@@ -50,22 +50,23 @@ services:
                         - ${MOUNT_POINT}/services/plex/config:/config
                         - ${MOUNT_POINT}/media/movies:/movies
                         - ${MOUNT_POINT}/media/tvshows:/tvshows
+                        - ${MOUNT_POINT}/../mnp-s/data:/po
                         - ${MOUNT_POINT}/services/plex/transcode:/transcode
         plexpy:
-                 image: linuxserver/plexpy
-                 container_name: plexpy
-                 network_mode: host
-                 ports:
+                image: linuxserver/plexpy
+                container_name: plexpy
+                network_mode: host
+                ports:
                         - 8181:8181
-                 environment:
+                environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
                         - TZ=${TZ}
-                 volumes:
+                volumes:
                         - ${MOUNT_POINT}/services/plexpy/config:/config
                         - ${MOUNT_POINT}/services/plexpy/logs:/logs
         sickchill:
-                image: sickchill/sickchill
+                image: sickchill/sickchill:master
                 container_name: sickchill
                 network_mode: host
                 restart: always
@@ -95,4 +96,3 @@ services:
                         - ${MOUNT_POINT}/services/couchpotato/config:/config
                         - ${MOUNT_POINT}/downloads:/downloads
                         - ${MOUNT_POINT}/media/movies:/movies
-                restart: unless-stopped

@@ -10,7 +10,7 @@ map $http_upgrade $connection_upgrade {
 
 server {
     listen               80;
-    server_name          plex.sautron.io;
+    server_name          cinema.sautron.io;
 
     #Some players don't reopen a socket and playback stops totally instead of resuming after an extended pause (e.g. Chrome)
     send_timeout         100m;
@@ -63,6 +63,7 @@ server {
     proxy_redirect       off;
     proxy_buffering      off;
 
+    
     location / {
         proxy_pass       http://plex_backend;
     }
