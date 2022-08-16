@@ -4,19 +4,17 @@ services:
         nginx:
                 image: nginx
                 container_name: nginx
-                network_mode: host
                 volumes:
-                        - ${MOUNT_POINT}/services/nginx/templates:/etc/nginx/templates
+                        - ${MOUNT_SERVICES}/nginx/templates:/etc/nginx/templates
                 ports:
                         - 80:80
                 environment:
                         - NGINX_HOST=sautron.io
                         - NGINX_PORT=80
         transmission:
-                image: linuxserver/transmission
+                image: lscr.io/linuxserver/transmission:latest
                 container_name: transmission
-                restart: always
-                network_mode: host
+                restart: unless-stopped
                 ports:
                         - 9091:9091
                         - 51413:51413
@@ -28,45 +26,70 @@ services:
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_POINT}/services/transmission/config:/config
-                        - ${MOUNT_POINT}/downloads:/downloads
+                        - ${MOUNT_SERVICES}/transmission/config:/config
+                        - ${MOUNT_MEDIA}/downloads:/downloads
         plex:
-                image: linuxserver/plex
+                image: lscr.io/linuxserver/plex:latest
                 container_name: plex
-                restart: always
                 network_mode: host
+                restart: unless-stopped
                 ports:
                         - 32400:32400
-                        - 32400:32400/udp
-                        - 32469:32469
-                        - 32469:32469/udp
-                        - 5353:5353/udp
                         - 1900:1900/udp
+                        - 3005:3005
+                        - 5353:5353/udp
+                        - 8324:8324
+                        - 32410:32410/udp
+                        - 32412:32412/udp
+                        - 32413:32413/udp
+                        - 32414:32414/udp
+                        - 32469:32469
+                environment:
+                        - PUID=${PUID}
+                        - PGID=${PGID}
+                        - VERSION=docker
+                        - TZ=${TZ}
+                        - PLEX_CLAIM=${PLEX_CLAIM}
+                volumes:
+                        - ${MOUNT_SERVICES}/plex/config:/config
+                        - ${MOUNT_MEDIA}/movies:/movies
+                        - ${MOUNT_MEDIA}/tv:/tv
+        scheduler:
+                image: mcuadros/ofelia:latest
+                container_name: scheduler
+                depends_on:
+                        - plextraktsync
+                command: daemon --docker
+                volumes:
+                        - /var/run/docker.sock:/var/run/docker.sock:ro
+                labels:
+                        ofelia.job-run.plextraktsync.schedule: "@every 6h"
+                        ofelia.job-run.plextraktsync.container: "plextraktsync sync"
+        plextraktsync:
+                image: ghcr.io/taxel/plextraktsync
+                container_name: plextraktsync
+                restart: on-failure:2
+                volumes:
+                        - ${MOUNT_SERVICES}/plextractsync:/app/config
+                command: watch
+        jellyfin:
+                image: lscr.io/linuxserver/jellyfin:latest
+                container_name: jellyfin
                 environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_POINT}/services/plex/config:/config
-                        - ${MOUNT_POINT}/media/movies:/movies
-                        - ${MOUNT_POINT}/media/tvshows:/tvshows
-                        - ${MOUNT_POINT}/../mnp-s/data:/po
-                        - ${MOUNT_POINT}/services/plex/transcode:/transcode
-        plexpy:
-                image: linuxserver/plexpy
-                container_name: plexpy
-                network_mode: host
+                        - ${MOUNT_SERVICES}/jellyfin/config:/config
+                        - ${MOUNT_MEDIA}/po:/po
                 ports:
-                        - 8181:8181
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - TZ=${TZ}
-                volumes:
-                        - ${MOUNT_POINT}/services/plexpy/config:/config
-                        - ${MOUNT_POINT}/services/plexpy/logs:/logs
+                        - 8096:8096
+                        - 8920:8920 #optional
+                        - 7359:7359/udp #optional
+                        - 1900:1900/udp #optional
+                restart: unless-stopped
         sickchill:
-                image: sickchill/sickchill:master
+                image: lscr.io/linuxserver/sickchill:latest
                 container_name: sickchill
                 network_mode: host
                 restart: always
@@ -77,11 +100,11 @@ services:
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_POINT}/services/sickchill/config.ini:/data/config.ini
-                        - ${MOUNT_POINT}/downloads:/downloads
-                        - ${MOUNT_POINT}/media/tvshows:/tv
+                        - ${MOUNT_SERVICES}/sickchill/config:/config
+                        - ${MOUNT_MEDIA}/downloads:/downloads
+                        - ${MOUNT_MEDIA}/tv:/tv
         couchpotato:
-                image: linuxserver/couchpotato
+                image: lscr.io/linuxserver/couchpotato
                 container_name: couchpotato
                 network_mode: host
                 restart: always
@@ -93,6 +116,7 @@ services:
                         - TZ=${TZ}
                         - UMASK_SET=022
                 volumes:
-                        - ${MOUNT_POINT}/services/couchpotato/config:/config
-                        - ${MOUNT_POINT}/downloads:/downloads
-                        - ${MOUNT_POINT}/media/movies:/movies
+                        - ${MOUNT_SERVICES}/couchpotato/config:/config
+                        - ${MOUNT_MEDIA}/downloads:/downloads
+                        - ${MOUNT_MEDIA}/movies:/movies
+
