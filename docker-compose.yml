@@ -1,16 +1,6 @@
 version: "3"
 
 services:
-        nginx:
-                image: nginx
-                container_name: nginx
-                volumes:
-                        - ${MOUNT_SERVICES}/nginx/templates:/etc/nginx/templates
-                ports:
-                        - 80:80
-                environment:
-                        - NGINX_HOST=sautron.io
-                        - NGINX_PORT=80
         transmission:
                 image: lscr.io/linuxserver/transmission:latest
                 container_name: transmission
@@ -32,6 +22,17 @@ services:
                         - ${MOUNT_MEDIA}/downloads:/downloads
                         - ${MOUNT_MEDIA}/movies:/movies
                         - ${MOUNT_MEDIA}/tv:/tv
+        ftp:
+                image: delfer/alpine-ftp-server:latest
+                container_name: ftp
+                ports:
+                        - 21:21
+                        - 21000-21010:21000-21010
+                environment:
+                        - USERS=${FTP_USERNAME}|${FTP_PASSWORD}|/data|${PUID}
+                volumes:
+                        - ${MOUNT_MEDIA}:/data
+
         plex:
                 image: lscr.io/linuxserver/plex:latest
                 container_name: plex
@@ -56,68 +57,71 @@ services:
                 volumes:
                         - ${MOUNT_SERVICES}/plex/config:/config
                         - ${MOUNT_MEDIA}/movies:/movies
+                        - ${MOUNT_MEDIA}/downloads:/downloads
                         - ${MOUNT_MEDIA}/tv:/tv
-        scheduler:
-                image: mcuadros/ofelia:latest
-                container_name: scheduler
-                depends_on:
-                        - plextraktsync
-                command: daemon --docker
-                volumes:
-                        - /var/run/docker.sock:/var/run/docker.sock:ro
-                labels:
-                        ofelia.job-run.plextraktsync.schedule: "@every 1h"
-                        ofelia.job-run.plextraktsync.container: "plextraktsync"
-                        ofelia.job-run.plextraktsync.command: "sync"
-        plextraktsync:
-                image: ghcr.io/taxel/plextraktsync
-                container_name: plextraktsync
-                restart: on-failure:2
-                volumes:
-                        - ${MOUNT_SERVICES}/plextractsync:/app/config
-        jellyfin:
-                image: lscr.io/linuxserver/jellyfin:latest
-                container_name: jellyfin
+        # sickchill:
+        #         image: lscr.io/linuxserver/sickchill:latest
+        #         container_name: sickchill
+        #         restart: always
+        #         networks:
+        #                 - proxy-network 
+        #         ports:
+        #                 - 8081:8081
+        #         environment:
+        #                 - PUID=${PUID}
+        #                 - PGID=${PGID}
+        #                 - TZ=${TZ}
+        #         volumes:
+        #                 - ${MOUNT_SERVICES}/sickchill/nginx/conf/:/nginx/conf
+        #                 - ${MOUNT_SERVICES}/sickchill/config:/config
+        #                 - ${MOUNT_MEDIA}/downloads:/downloads
+        #                 - ${MOUNT_MEDIA}/tv:/tv
+        sonarr:
+                image: lscr.io/linuxserver/sonarr:latest
+                container_name: sonarr
                 environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_SERVICES}/jellyfin/config:/config
-                        - ${MOUNT_MEDIA}/po:/po
+                        - ${MOUNT_SERVICES}/sonarr:/config
+                        - ${MOUNT_MEDIA}/tv:/tv #optional
+                        - ${MOUNT_MEDIA}/downloads:/downloads
                 ports:
-                        - 8096:8096
-                        - 8920:8920 #optional
-                        - 7359:7359/udp #optional
-                        - 1901:1900/udp #optional
+                        - 8989:8989
                 restart: unless-stopped
-        sickchill:
-                image: lscr.io/linuxserver/sickchill:latest
-                container_name: sickchill
-                restart: always
-                ports:
-                        - 8081:8081
+        radarr:
+                image: lscr.io/linuxserver/radarr:latest
+                container_name: radarr
                 environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_SERVICES}/sickchill/config:/config
+                        - ${MOUNT_SERVICES}/radarr:/config
+                        - ${MOUNT_MEDIA}/movies:/movies #optional
                         - ${MOUNT_MEDIA}/downloads:/downloads
-                        - ${MOUNT_MEDIA}/tv:/tv
-        couchpotato:
-                image: lscr.io/linuxserver/couchpotato
-                container_name: couchpotato
-                restart: always
                 ports:
-                        - 5050:5050
+                        - 7878:7878
+                restart: unless-stopped
+        jackett:
+                image: lscr.io/linuxserver/jackett:latest
+                container_name: jackett
                 environment:
                         - PUID=${PUID}
                         - PGID=${PGID}
                         - TZ=${TZ}
-                        - UMASK_SET=022
+                        - AUTO_UPDATE=true #optional
                 volumes:
-                        - ${MOUNT_SERVICES}/couchpotato/config:/config
+                        - ${MOUNT_SERVICES}/jackett:/config
                         - ${MOUNT_MEDIA}/downloads:/downloads
-                        - ${MOUNT_MEDIA}/movies:/movies
+                ports:
+                        - 9117:9117
+                restart: unless-stopped
+volumes:
+        proxy-conf:
+                external: true
 
+networks:
+        proxy-network:
+                external: true
