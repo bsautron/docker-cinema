@@ -55,27 +55,11 @@ services:
                         - TZ=${TZ}
                         - PLEX_CLAIM=${PLEX_CLAIM}
                 volumes:
-                        - ${MOUNT_SERVICES}/plex/config:/config
+                        - ${MOUNT_MEDIA}/services/plex/config:/config
                         - ${MOUNT_MEDIA}/movies:/movies
                         - ${MOUNT_MEDIA}/downloads:/downloads
                         - ${MOUNT_MEDIA}/tv:/tv
-        # sickchill:
-        #         image: lscr.io/linuxserver/sickchill:latest
-        #         container_name: sickchill
-        #         restart: always
-        #         networks:
-        #                 - proxy-network 
-        #         ports:
-        #                 - 8081:8081
-        #         environment:
-        #                 - PUID=${PUID}
-        #                 - PGID=${PGID}
-        #                 - TZ=${TZ}
-        #         volumes:
-        #                 - ${MOUNT_SERVICES}/sickchill/nginx/conf/:/nginx/conf
-        #                 - ${MOUNT_SERVICES}/sickchill/config:/config
-        #                 - ${MOUNT_MEDIA}/downloads:/downloads
-        #                 - ${MOUNT_MEDIA}/tv:/tv
+                        - ${MOUNT_MEDIA}/audiobooks:/audiobooks
         sonarr:
                 image: lscr.io/linuxserver/sonarr:latest
                 container_name: sonarr
@@ -118,6 +102,18 @@ services:
                 ports:
                         - 9117:9117
                 restart: unless-stopped
+        auto-m4b:
+                image: seanap/auto-m4b
+                container_name: auto-m4b
+                volumes:
+                        - ${MOUNT_SERVICES}/auto-m4b:/config
+                        - ${MOUNT_MEDIA}/temp:/temp
+                environment:
+                        - PUID=${PUID}
+                        - PGID=${PGID}
+                        - CPU_CORES=2
+                        - SLEEPTIME=1m
+                        - MAKE_BACKUP=Y
 volumes:
         proxy-conf:
                 external: true
