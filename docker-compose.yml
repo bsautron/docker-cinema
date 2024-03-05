@@ -18,7 +18,7 @@ services:
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_SERVICES}/transmission/config:/config
+                        - ${MOUNT_MEDIA}/services/transmission/config:/config
                         - ${MOUNT_MEDIA}/downloads:/downloads
                         - ${MOUNT_MEDIA}/movies:/movies
                         - ${MOUNT_MEDIA}/tv:/tv
@@ -68,7 +68,7 @@ services:
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_SERVICES}/sonarr:/config
+                        - ${MOUNT_MEDIA}/services/sonarr:/config
                         - ${MOUNT_MEDIA}/tv:/tv #optional
                         - ${MOUNT_MEDIA}/downloads:/downloads
                 ports:
@@ -82,7 +82,7 @@ services:
                         - PGID=${PGID}
                         - TZ=${TZ}
                 volumes:
-                        - ${MOUNT_SERVICES}/radarr:/config
+                        - ${MOUNT_MEDIA}/services/radarr:/config
                         - ${MOUNT_MEDIA}/movies:/movies #optional
                         - ${MOUNT_MEDIA}/downloads:/downloads
                 ports:
@@ -97,7 +97,7 @@ services:
                         - TZ=${TZ}
                         - AUTO_UPDATE=true #optional
                 volumes:
-                        - ${MOUNT_SERVICES}/jackett:/config
+                        - ${MOUNT_MEDIA}/services/jackett:/config
                         - ${MOUNT_MEDIA}/downloads:/downloads
                 ports:
                         - 9117:9117
@@ -106,7 +106,7 @@ services:
                 image: seanap/auto-m4b
                 container_name: auto-m4b
                 volumes:
-                        - ${MOUNT_SERVICES}/auto-m4b:/config
+                        - ${MOUNT_MEDIA}/services/auto-m4b:/config
                         - ${MOUNT_MEDIA}/temp:/temp
                 environment:
                         - PUID=${PUID}
@@ -114,10 +114,3 @@ services:
                         - CPU_CORES=2
                         - SLEEPTIME=1m
                         - MAKE_BACKUP=Y
-volumes:
-        proxy-conf:
-                external: true
-
-networks:
-        proxy-network:
-                external: true
