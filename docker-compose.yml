@@ -1,116 +1,139 @@
 version: "3"
 
 services:
-        transmission:
-                image: lscr.io/linuxserver/transmission:latest
-                container_name: transmission
-                restart: unless-stopped
-                ports:
-                        - 9091:9091
-                        - 51413:51413
-                        - 51413:51413/udp
-                expose:
-                        - 9091
-                environment:
-                        - USER=${TRANSMISSION_USERNAME}
-                        - PASS=${TRANSMISSION_PASSWORD}
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - TZ=${TZ}
-                volumes:
-                        - ${MOUNT_MEDIA}/services/transmission/config:/config
-                        - ${MOUNT_MEDIA}/downloads:/downloads
-                        - ${MOUNT_MEDIA}/movies:/movies
-                        - ${MOUNT_MEDIA}/tv:/tv
-        ftp:
-                image: delfer/alpine-ftp-server:latest
-                container_name: ftp
-                ports:
-                        - 21:21
-                        - 21000-21010:21000-21010
-                environment:
-                        - USERS=${FTP_USERNAME}|${FTP_PASSWORD}|/data|${PUID}
-                volumes:
-                        - ${MOUNT_MEDIA}:/data
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${MOUNT_MEDIA}/services/heimdall/config:/config
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
 
-        plex:
-                image: lscr.io/linuxserver/plex:latest
-                container_name: plex
-                restart: unless-stopped
-                ports:
-                        - 32400:32400
-                        - 1900:1900/udp
-                        - 3005:3005
-                        - 5353:5353/udp
-                        - 8324:8324
-                        - 32410:32410/udp
-                        - 32412:32412/udp
-                        - 32413:32413/udp
-                        - 32414:32414/udp
-                        - 32469:32469
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - VERSION=docker
-                        - TZ=${TZ}
-                        - PLEX_CLAIM=${PLEX_CLAIM}
-                volumes:
-                        - ${MOUNT_MEDIA}/services/plex/config:/config
-                        - ${MOUNT_MEDIA}/movies:/movies
-                        - ${MOUNT_MEDIA}/downloads:/downloads
-                        - ${MOUNT_MEDIA}/tv:/tv
-                        - ${MOUNT_MEDIA}/audiobooks:/audiobooks
-        sonarr:
-                image: lscr.io/linuxserver/sonarr:latest
-                container_name: sonarr
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - TZ=${TZ}
-                volumes:
-                        - ${MOUNT_MEDIA}/services/sonarr:/config
-                        - ${MOUNT_MEDIA}/tv:/tv #optional
-                        - ${MOUNT_MEDIA}/downloads:/downloads
-                ports:
-                        - 8989:8989
-                restart: unless-stopped
-        radarr:
-                image: lscr.io/linuxserver/radarr:latest
-                container_name: radarr
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - TZ=${TZ}
-                volumes:
-                        - ${MOUNT_MEDIA}/services/radarr:/config
-                        - ${MOUNT_MEDIA}/movies:/movies #optional
-                        - ${MOUNT_MEDIA}/downloads:/downloads
-                ports:
-                        - 7878:7878
-                restart: unless-stopped
-        jackett:
-                image: lscr.io/linuxserver/jackett:latest
-                container_name: jackett
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - TZ=${TZ}
-                        - AUTO_UPDATE=true #optional
-                volumes:
-                        - ${MOUNT_MEDIA}/services/jackett:/config
-                        - ${MOUNT_MEDIA}/downloads:/downloads
-                ports:
-                        - 9117:9117
-                restart: unless-stopped
-        auto-m4b:
-                image: seanap/auto-m4b
-                container_name: auto-m4b
-                volumes:
-                        - ${MOUNT_MEDIA}/services/auto-m4b:/config
-                        - ${MOUNT_MEDIA}/temp:/temp
-                environment:
-                        - PUID=${PUID}
-                        - PGID=${PGID}
-                        - CPU_CORES=2
-                        - SLEEPTIME=1m
-                        - MAKE_BACKUP=Y
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    restart: unless-stopped
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    expose:
+      - 9091
+    environment:
+      - USER=${TRANSMISSION_USERNAME}
+      - PASS=${TRANSMISSION_PASSWORD}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${MOUNT_MEDIA}/services/transmission/config:/config
+      - ${MOUNT_MEDIA}/downloads:/downloads
+      - ${MOUNT_MEDIA}/movies:/movies
+      - ${MOUNT_MEDIA}/tv:/tv
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    ports:
+      - 32400:32400
+      - 1900:1900/udp
+      - 3005:3005
+      # - 5353:5353/udp
+      - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32469:32469
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - VERSION=docker
+      - TZ=${TZ}
+      - PLEX_CLAIM=${PLEX_CLAIM}
+    volumes:
+      - ${MOUNT_MEDIA}/services/plex/config:/config
+      - ${MOUNT_MEDIA}/movies:/movies
+      - ${MOUNT_MEDIA}/downloads:/downloads
+      - ${MOUNT_MEDIA}/tv:/tv
+      - ${MOUNT_MEDIA}/audiobooks:/audiobooks
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${MOUNT_MEDIA}/services/sonarr:/config
+      - ${MOUNT_MEDIA}/tv:/tv #optional
+      - ${MOUNT_MEDIA}/downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${MOUNT_MEDIA}/services/radarr:/config
+      - ${MOUNT_MEDIA}/movies:/movies #optional
+      - ${MOUNT_MEDIA}/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${MOUNT_MEDIA}/services/bazarr/config:/config
+      - ${MOUNT_MEDIA}/movies:/movies #optional
+      - ${MOUNT_MEDIA}/tv:/tv #optional
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true #optional
+    volumes:
+      - ${MOUNT_MEDIA}/services/jackett:/config
+      - ${MOUNT_MEDIA}/downloads:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+
+  auto-m4b:
+    image: seanap/auto-m4b
+    container_name: auto-m4b
+    volumes:
+      - ${MOUNT_MEDIA}/services/auto-m4b:/config
+      - ${MOUNT_MEDIA}/temp:/temp
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - CPU_CORES=2
+      - SLEEPTIME=1m
+      - MAKE_BACKUP=Y
