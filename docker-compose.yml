@@ -4,6 +4,7 @@ services:
   heimdall:
     image: lscr.io/linuxserver/heimdall:latest
     container_name: heimdall
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -13,7 +14,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    restart: unless-stopped
 
   transmission:
     image: lscr.io/linuxserver/transmission:latest
@@ -45,7 +45,7 @@ services:
       - 32400:32400
       - 1900:1900/udp
       - 3005:3005
-      # - 5353:5353/udp
+      - 5353:5353/udp
       - 8324:8324
       - 32410:32410/udp
       - 32412:32412/udp
@@ -68,6 +68,7 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -78,11 +79,11 @@ services:
       - ${MOUNT_MEDIA}/downloads:/downloads
     ports:
       - 8989:8989
-    restart: unless-stopped
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -93,11 +94,11 @@ services:
       - ${MOUNT_MEDIA}/downloads:/downloads
     ports:
       - 7878:7878
-    restart: unless-stopped
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -108,11 +109,11 @@ services:
       - ${MOUNT_MEDIA}/tv:/tv #optional
     ports:
       - 6767:6767
-    restart: unless-stopped
 
   jackett:
     image: lscr.io/linuxserver/jackett:latest
     container_name: jackett
+    restart: unless-stopped
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -123,11 +124,11 @@ services:
       - ${MOUNT_MEDIA}/downloads:/downloads
     ports:
       - 9117:9117
-    restart: unless-stopped
 
   auto-m4b:
     image: seanap/auto-m4b
     container_name: auto-m4b
+    restart: unless-stopped
     volumes:
       - ${MOUNT_MEDIA}/services/auto-m4b:/config
       - ${MOUNT_MEDIA}/temp:/temp
@@ -141,6 +142,7 @@ services:
   scheduler:
     image: mcuadros/ofelia:latest
     container_name: scheduler
+    restart: unless-stopped
     depends_on:
       - plextraktsync
     command: daemon --docker
